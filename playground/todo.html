@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Todo</title>
+</head>
+<body>
+    <div ys-data="{ newTodo: '', todos: ['Learn compiler', 'Build directives'] }">
+        <h1>Todo</h1>
+
+        <input ys-model="newTodo" placeholder="New todo">
+
+        <button @click="todos = [...todos, newTodo]; newTodo = ''">
+            Add
+        </button>
+
+        <ul>
+            <li ys-for="todo, index in todos">
+                <span ys-text="index"></span>.
+                <span ys-text="todo"></span>
+
+                <button @click="todos = todos.filter((_, i) => i !== index)">
+                    Remove
+                </button>
+            </li>
+        </ul>
+
+        <p ys-if="todos.length === 0">
+            No todos yet.
+        </p>
+    </div>
+
+    <script type="module" src="../src/ys.js"></script>
+    <script type="module">
+        YS.start();
+    </script>
+</body>
+</html>

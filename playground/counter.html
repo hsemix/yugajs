@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Counter</title>
+</head>
+<body>
+    <div ys-data="{ count: 0, open: true }">
+        <h1>Counter</h1>
+
+        <button @click="count--">-</button>
+        <span ys-text="count"></span>
+        <button @click="count++">+</button>
+
+        <hr>
+
+        <button @click="open = !open">
+            Toggle
+        </button>
+
+        <p ys-show="open">
+            This text is controlled by ys-show.
+        </p>
+    </div>
+
+    <script type="module" src="../src/ys.js"></script>
+    <script type="module">
+        YS.start();
+    </script>
+</body>
+</html>

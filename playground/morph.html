@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Morph</title>
+</head>
+<body>
+    <h1>Morph</h1>
+
+    <button
+        ys-get="index.php?path=/dashboard"
+        ys-target="#dashboard"
+        ys-swap="morph">
+        Refresh Dashboard
+    </button>
+
+    <div id="dashboard">
+        <input value="This input should keep focus during morph">
+        <p>Old dashboard content</p>
+    </div>
+
+    <script type="module" src="../src/ys.js"></script>
+    <script type="module">
+        YS.start();
+    </script>
+</body>
+</html>

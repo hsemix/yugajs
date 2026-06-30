@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Stabilization Tests</title>
+
+    <style>
+        [ys-cloak] {
+            display: none !important;
+        }
+
+        .box {
+            padding: 10px;
+            border: 1px solid #ccc;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+
+<h1>Stabilization Tests</h1>
+
+<div ys-data="{ count: 0, message: 'Hello', showDynamic: false }" ys-init="count = 5">
+
+    <h2>1. ys-init</h2>
+    <p>Count should start at 5:</p>
+    <strong ys-text="count"></strong>
+
+    <button @click="count++">
+        Increment
+    </button>
+
+    <hr>
+
+    <h2>2. Error handling</h2>
+    <p>Clicking this should show a clean [YS] error in console:</p>
+
+    <button @click="missingFunction()">
+        Trigger Error
+    </button>
+
+    <hr>
+
+    <h2>3. MutationObserver auto compile</h2>
+
+    <button @click="
+        document.querySelector('#dynamic').innerHTML = `
+            <div class='box'>
+                <p ys-text='message'></p>
+                <button @click='message = message + &quot;!&quot;'>Update Dynamic Message</button>
+            </div>
+        `
+    ">
+        Insert Dynamic HTML
+    </button>
+
+    <div id="dynamic"></div>
+
+    <hr>
+
+    <h2>4. Dynamic component</h2>
+
+    <button @click="
+        document.querySelector('#dynamic-component').innerHTML = `
+            <div ys-data='{ localCount: 10 }' class='box'>
+                <p ys-text='localCount'></p>
+                <button @click='localCount++'>Increase Local</button>
+            </div>
+        `
+    ">
+        Insert New Component
+    </button>
+
+    <div id="dynamic-component"></div>
+
+</div>
+
+<script type="module" src="../src/ys.js"></script>
+<script type="module">
+    YS.start()
+</script>
+</body>
+</html>

@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JS - Library</title>
+</head>
+
+<body>
+
+    <div ys-data="{
+    name: '',
+    age: null,
+    volume: 50,
+    accepted: false,
+    skills: [],
+    plan: 'pro',
+    role: 'user',
+    roles: [],
+    file: null,
+    bio: '<b>Hello</b>'
+}">
+        <input ys-model="name" placeholder="Name">
+
+        <input type="number" ys-model="age">
+
+        <input type="range" ys-model="volume">
+
+        <label>
+            <input type="checkbox" ys-model="accepted">
+            Accepted
+        </label>
+
+        <label>
+            <input type="checkbox" value="js" ys-model="skills">
+            JS
+        </label>
+
+        <label>
+            <input type="checkbox" value="php" ys-model="skills">
+            PHP
+        </label>
+
+        <label>
+            <input type="radio" value="free" ys-model="plan">
+            Free
+        </label>
+
+        <label>
+            <input type="radio" value="pro" ys-model="plan">
+            Pro
+        </label>
+
+        <select ys-model="role">
+            <option value="user">User</option>
+            <option value="admin">Admin</option>
+        </select>
+
+        <select multiple ys-model="roles">
+            <option value="admin">Admin</option>
+            <option value="editor">Editor</option>
+            <option value="viewer">Viewer</option>
+        </select>
+
+        <input type="file" ys-model="file">
+
+        <div contenteditable ys-model="bio"></div>
+
+        <pre ys-text="JSON.stringify({
+        name,
+        age,
+        volume,
+        accepted,
+        skills,
+        plan,
+        role,
+        roles,
+        file: file ? file.name : null,
+        bio
+    }, null, 2)"></pre>
+    </div>
+
+    <script type="module" src="../src/ys.js"></script>
+    <script type="module">
+        YS.start();
+    </script>
+</body>
+
+</html>

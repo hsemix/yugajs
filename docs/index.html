@@ -1,0 +1,908 @@
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>YugaJS Documentation</title>
+    <meta name="description" content="Documentation for YugaJS, a lightweight JavaScript library for reactive, server-driven interfaces.">
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="site-shell">
+        <aside class="sidebar" aria-label="Documentation navigation">
+            <div class="brand">
+                <div class="brand-mark">YS</div>
+                <div>
+                    <h1>YugaJS <span>Documentation</span></h1>
+                </div>
+            </div>
+            <input class="search" data-search type="search" placeholder="Filter docs..." aria-label="Filter docs">
+            <nav class="nav">
+                <a href="#start">Start</a>
+                <a href="#installation">Installation</a>
+                <a href="#essentials">Essentials</a>
+                <a href="#directives">Directives</a>
+                <a href="#server">Server Requests</a>
+                <a href="#streaming">Streaming</a>
+                <a href="#components">Components</a>
+                <a href="#reactivity">Reactivity</a>
+                <a href="#dom">DOM API</a>
+                <a href="#morphing">Morphing</a>
+                <a href="#plugins">Plugins</a>
+                <a href="#examples">Examples</a>
+            </nav>
+            <!-- <p class="sidebar-note"> <code>/docs</code> folder.</p> -->
+        </aside>
+
+        <div class="content">
+            <header class="mobile-bar">
+                <strong>YugaJS Docs</strong>
+                <button class="menu-toggle" data-menu-toggle type="button" aria-label="Open documentation menu">Menu</button>
+            </header>
+
+            <section class="hero" id="start">
+                <div class="hero-inner">
+                    <p class="eyebrow">Reactive HTML, server swaps, streams</p>
+                    <h2>YugaJS</h2>
+                    <p>A lightweight browser library for building modern, server-driven interfaces with plain HTML attributes, tiny reactive scopes, jQuery-like helpers, DOM morphing, and EventSource streams.</p>
+                    <div class="hero-actions">
+                        <a class="button" href="#installation">Install</a>
+                        <a class="button secondary" href="#directives">Browse Directives</a>
+                    </div>
+                </div>
+            </section>
+
+            <main class="main">
+                <section class="section" id="installation" data-search-item>
+                    <h2>Installation</h2>
+                    <p class="lead">Use the built file directly in the browser, or import the source entry while developing with Vite.</p>
+
+                    <h3>Browser Script</h3>
+                    <pre><code>&lt;script src="/dist/ys.min.js"&gt;&lt;/script&gt;
+&lt;script&gt;
+    YS.start()
+&lt;/script&gt;</code></pre>
+
+                    <h3>Vite Development</h3>
+                    <pre><code>&lt;script type="module" src="/dist/ys.esm.js"&gt;&lt;/script&gt;
+&lt;script type="module"&gt;
+    YS.start()
+&lt;/script&gt;</code></pre>
+
+                    <h3>Local Commands</h3>
+                    <pre><code>npm install
+npm run dev
+npm run build
+</code></pre>
+
+                    <div class="callout">
+                        <p>YugaJS exposes the same object as <code>YS</code> and <code>$</code> on <code>globalThis</code>. Call <code>YS.start()</code> after registering plugins or components.</p>
+                    </div>
+
+                    <h3>Startup Order</h3>
+                    <pre><code>&lt;script src="/dist/ys.min.js"&gt;&lt;/script&gt;
+&lt;script&gt;
+    YS.use(YS.headless)
+
+    YS.component('counter', {
+        data() {
+            return { count: 0 }
+        }
+    })
+
+    YS.start()
+&lt;/script&gt;</code></pre>
+                </section>
+
+                <section class="section" id="essentials" data-search-item>
+                    <h2>Essentials</h2>
+                    <p class="lead">A YugaJS component starts at an element with <code>ys-data</code> or <code>ys-component</code>. Expressions run against that component scope.</p>
+
+                    <pre><code>&lt;div ys-data="{ count: 0 }"&gt;
+    &lt;button @click="count++"&gt;+&lt;/button&gt;
+    &lt;button @click="count--"&gt;-&lt;/button&gt;
+    &lt;strong ys-text="count"&gt;&lt;/strong&gt;
+&lt;/div&gt;</code></pre>
+
+                    <div class="grid">
+                        <article class="card">
+                            <h3>Scopes</h3>
+                            <p>Each <code>ys-data</code> block gets a reactive object. Directives inside read and write properties from that object.</p>
+                        </article>
+                        <article class="card">
+                            <h3>Events</h3>
+                            <p>Use <code>@click</code>, <code>@submit.prevent</code>, and other event bindings. The handler receives <code>$event</code> and <code>$el</code>.</p>
+                        </article>
+                        <article class="card">
+                            <h3>Updates</h3>
+                            <p>DOM updates are scheduled automatically. Use <code>YS.nextTick()</code> when you need to run code after the flush.</p>
+                        </article>
+                    </div>
+
+                    <h3>Expression Context</h3>
+                    <p>Directive expressions run with the current scope in context. Event handlers also receive <code>$event</code> and <code>$el</code>.</p>
+                    <pre><code>&lt;button @click="count++; console.log($event.type, $el)"&gt;
+    Add
+&lt;/button&gt;</code></pre>
+
+                    <h3>Nested Scopes</h3>
+                    <p>Nested <code>ys-data</code> elements create independent scopes. Inner expressions read from their own scope first.</p>
+                    <pre><code>&lt;div ys-data="{ count: 0 }"&gt;
+    Parent: &lt;span ys-text="count"&gt;&lt;/span&gt;
+
+    &lt;div ys-data="{ count: 100 }"&gt;
+        Child: &lt;span ys-text="count"&gt;&lt;/span&gt;
+    &lt;/div&gt;
+&lt;/div&gt;</code></pre>
+                </section>
+
+                <section class="section" id="directives">
+                    <h2>Directives</h2>
+                    <p class="lead">Directives are HTML attributes that connect DOM behavior to a component scope. Short forms are supported for events and bindings.</p>
+
+                    <div class="directive-list">
+                        <article class="directive" data-search-item>
+                            <header><h3><code>ys-data</code></h3><span class="tag">component scope</span></header>
+                            <p>Creates a reactive scope for an element and its children.</p>
+                            <pre><code>&lt;div ys-data="{ name: 'Aisha', open: true }"&gt;
+    &lt;span ys-text="name"&gt;&lt;/span&gt;
+&lt;/div&gt;</code></pre>
+                        </article>
+
+                        <article class="directive" data-search-item>
+                            <header><h3><code>ys-text</code> and <code>ys-html</code></h3><span class="tag">output</span></header>
+                            <p><code>ys-text</code> writes text content. <code>ys-html</code> writes raw HTML, so only use trusted content.</p>
+                            <pre><code>&lt;p ys-text="message"&gt;&lt;/p&gt;
+&lt;div ys-html="trustedMarkup"&gt;&lt;/div&gt;</code></pre>
+                        </article>
+
+                        <article class="directive" data-search-item>
+                            <header><h3><code>ys-model</code></h3><span class="tag">forms</span></header>
+                            <p>Two-way binding for text inputs, textareas, selects, checkboxes, radios, file inputs, ranges, numbers, and contenteditable elements.</p>
+                            <pre><code>&lt;input ys-model="name"&gt;
+&lt;input type="checkbox" ys-model="enabled"&gt;
+&lt;select multiple ys-model="roles"&gt;...&lt;/select&gt;</code></pre>
+                        </article>
+
+                        <article class="directive" data-search-item>
+                            <header><h3><code>@event</code> / <code>ys-on:event</code></h3><span class="tag">events</span></header>
+                            <p>Runs an expression when an event fires. Modifiers include <code>prevent</code>, <code>stop</code>, <code>self</code>, <code>once</code>, and <code>debounce</code>.</p>
+                            <pre><code>&lt;button @click="count++"&gt;Add&lt;/button&gt;
+&lt;form @submit.prevent="save()"&gt;...&lt;/form&gt;
+&lt;input @input.debounce="search = $event.target.value"&gt;</code></pre>
+                        </article>
+
+                        <article class="directive" data-search-item>
+                            <header><h3><code>:attr</code> / <code>ys-bind:attr</code></h3><span class="tag">attributes</span></header>
+                            <p>Binds any attribute to an expression. False, null, and undefined remove the attribute; true writes a boolean attribute.</p>
+                            <pre><code>&lt;button :disabled="saving"&gt;Save&lt;/button&gt;
+&lt;a :href="'/users/' + id"&gt;Profile&lt;/a&gt;</code></pre>
+                        </article>
+
+                        <article class="directive" data-search-item>
+                            <header><h3><code>ys-class</code></h3><span class="tag">classes</span></header>
+                            <p>Accepts a string, array, or object of class names. Object keys may contain multiple class names.</p>
+                            <pre><code>&lt;p ys-class="{ 'active danger': selected, muted: !selected }"&gt;
+    Status
+&lt;/p&gt;</code></pre>
+                        </article>
+
+                        <article class="directive" data-search-item>
+                            <header><h3><code>ys-show</code> and <code>ys-if</code></h3><span class="tag">visibility</span></header>
+                            <p><code>ys-show</code> toggles display. <code>ys-if</code> mounts or removes content. Add <code>ys-transition</code> and optional <code>ys-duration</code> for built-in transitions.</p>
+                            <pre><code>&lt;div ys-show="open" ys-transition&gt;Panel&lt;/div&gt;
+&lt;template ys-if="users.length === 0"&gt;
+    &lt;p&gt;No users yet&lt;/p&gt;
+&lt;/template&gt;</code></pre>
+                        </article>
+
+                        <article class="directive" data-search-item>
+                            <header><h3><code>ys-for</code> and <code>ys-key</code></h3><span class="tag">lists</span></header>
+                            <p>Loops over arrays with optional index. Add <code>ys-key</code> for stable DOM reuse and animated moves. Use <code>&lt;template&gt;</code> when the loop should render several nodes.</p>
+                            <pre><code>&lt;li ys-for="user, index in users" ys-key="user.id"&gt;
+    &lt;span ys-text="user.name"&gt;&lt;/span&gt;
+    &lt;button @click="users = users.filter((_, i) =&gt; i !== index)"&gt;Remove&lt;/button&gt;
+&lt;/li&gt;</code></pre>
+                        </article>
+
+                        <article class="directive" data-search-item>
+                            <header><h3><code>ys-init</code> and <code>ys-effect</code></h3><span class="tag">lifecycle</span></header>
+                            <p><code>ys-init</code> runs once when the element compiles. <code>ys-effect</code> re-runs whenever dependencies used by the expression change.</p>
+                            <pre><code>&lt;div ys-init="loaded = true" ys-effect="console.log(count)"&gt;&lt;/div&gt;</code></pre>
+                        </article>
+
+                        <article class="directive" data-search-item>
+                            <header><h3><code>ys-cloak</code></h3><span class="tag">first paint</span></header>
+                            <p>Hide uncompiled UI until YugaJS starts. Add a CSS rule for the initial page load.</p>
+                            <pre><code>&lt;style&gt;[ys-cloak] { display: none !important; }&lt;/style&gt;
+&lt;div ys-data="{ ready: true }" ys-cloak&gt;Ready&lt;/div&gt;</code></pre>
+                        </article>
+
+                        <article class="directive" data-search-item>
+                            <header><h3><code>ys-confirm</code></h3><span class="tag">guard</span></header>
+                            <p>Shows a native confirmation dialog before the click continues.</p>
+                            <pre><code>&lt;button ys-confirm="Delete this user?" ys-post="/users/1/delete"&gt;
+    Delete
+&lt;/button&gt;</code></pre>
+                        </article>
+
+                        <article class="directive" data-search-item>
+                            <header><h3><code>ys-key</code></h3><span class="tag">keyboard</span></header>
+                            <p>Runs an expression when a keyboard combo is pressed. Combos can include <code>ctrl</code>, <code>cmd</code>, <code>meta</code>, <code>shift</code>, and <code>alt</code>. Add <code>.window</code> for a window-level listener.</p>
+                            <pre><code>&lt;div ys-data="{ open: false }"&gt;
+    &lt;div
+        ys-key:ctrl+k.window="open = true"
+        ys-key:escape.window="open = false"&gt;&lt;/div&gt;
+
+    &lt;div ys-show="open" ys-cloak&gt;Search&lt;/div&gt;
+&lt;/div&gt;</code></pre>
+                        </article>
+
+                        <article class="directive" data-search-item>
+                            <header><h3><code>ys-teleport</code> and <code>ys-slot</code></h3><span class="tag">composition</span></header>
+                            <p><code>ys-teleport</code> moves an element into another DOM target. <code>ys-slot</code> renders the original child markup inside a component template.</p>
+                            <pre><code>&lt;div ys-teleport="#modals"&gt;Modal content&lt;/div&gt;
+&lt;div ys-slot&gt;&lt;/div&gt;</code></pre>
+                        </article>
+
+                        <article class="directive" data-search-item>
+                            <header><h3><code>ys-preview</code> and <code>ys-dropzone</code></h3><span class="tag">uploads</span></header>
+                            <p><code>ys-preview</code> renders selected files into a target. <code>ys-dropzone</code> connects a drop area to a file input and adds <code>ys-dragover</code> while files hover over it.</p>
+                            <pre><code>&lt;input id="avatar" type="file" ys-preview="#preview"&gt;
+&lt;div ys-dropzone="#avatar"&gt;Drop files here&lt;/div&gt;
+&lt;div id="preview"&gt;&lt;/div&gt;</code></pre>
+                        </article>
+
+                        <article class="directive" data-search-item>
+                            <header><h3><code>ys-memo</code></h3><span class="tag">performance</span></header>
+                            <p>Skips recompiling a subtree while the memo expression is unchanged.</p>
+                            <pre><code>&lt;div ys-memo="user.id"&gt;
+    Expensive user fragment
+&lt;/div&gt;</code></pre>
+                        </article>
+                    </div>
+
+                    <h3>Complete Directive Index</h3>
+                    <div class="table-wrap" data-search-item>
+                        <table>
+                            <thead>
+                                <tr><th>Directive</th><th>Purpose</th><th>Common companions</th></tr>
+                            </thead>
+                            <tbody>
+                                <tr><td><code>ys-data</code></td><td>Creates a reactive scope.</td><td><code>ys-init</code>, <code>ys-effect</code></td></tr>
+                                <tr><td><code>ys-component</code></td><td>Mounts a registered component.</td><td><code>ys-props</code>, <code>ys-slot</code></td></tr>
+                                <tr><td><code>ys-text</code></td><td>Writes text content.</td><td>Any scope expression</td></tr>
+                                <tr><td><code>ys-html</code></td><td>Writes trusted HTML.</td><td>Sanitized server/client markup</td></tr>
+                                <tr><td><code>ys-model</code></td><td>Two-way form binding.</td><td>Inputs, selects, textareas, contenteditable</td></tr>
+                                <tr><td><code>ys-bind:attr</code> / <code>:attr</code></td><td>Binds any attribute.</td><td><code>:disabled</code>, <code>:href</code>, <code>:style</code></td></tr>
+                                <tr><td><code>ys-class</code></td><td>Applies classes from strings, arrays, or objects.</td><td>State-driven styling</td></tr>
+                                <tr><td><code>ys-on:event</code> / <code>@event</code></td><td>Runs code for DOM events.</td><td><code>.prevent</code>, <code>.stop</code>, <code>.once</code>, <code>.debounce</code></td></tr>
+                                <tr><td><code>ys-show</code></td><td>Toggles display without removing the node.</td><td><code>ys-transition</code>, <code>ys-cloak</code></td></tr>
+                                <tr><td><code>ys-if</code></td><td>Mounts/removes conditional content.</td><td><code>&lt;template&gt;</code>, <code>ys-transition</code></td></tr>
+                                <tr><td><code>ys-for</code></td><td>Renders lists.</td><td><code>ys-key</code>, <code>&lt;template&gt;</code>, <code>ys-transition</code></td></tr>
+                                <tr><td><code>ys-key</code></td><td>Handles keyboard shortcuts.</td><td><code>.window</code>, combos like <code>ctrl+k</code></td></tr>
+                                <tr><td><code>ys-get</code></td><td>Fetches server HTML or JSON with GET.</td><td><code>ys-target</code>, <code>ys-swap</code>, <code>ys-trigger</code></td></tr>
+                                <tr><td><code>ys-post</code></td><td>Submits forms or state with POST.</td><td><code>ys-validate</code>, <code>ys-reset</code>, loading attributes</td></tr>
+                                <tr><td><code>ys-action</code></td><td>Sends an action name and clean state as JSON.</td><td><code>ys-send</code></td></tr>
+                                <tr><td><code>ys-stream</code></td><td>Opens an EventSource stream.</td><td><code>ys-target</code>, <code>ys-swap</code>, <code>ys-action-url</code></td></tr>
+                                <tr><td><code>ys-stream-action</code></td><td>Posts actions from inside a stream context.</td><td><code>ys-action-url</code></td></tr>
+                                <tr><td><code>ys-sse-signals</code></td><td>Streams state updates into target scopes.</td><td>Payload with <code>target</code> and <code>signals</code></td></tr>
+                                <tr><td><code>ys-visit</code></td><td>Fetches page fragments and pushes history state.</td><td><code>ys-target</code>, <code>ys-swap</code></td></tr>
+                                <tr><td><code>ys-redirect</code></td><td>Navigates on click or submit.</td><td>URL expression</td></tr>
+                                <tr><td><code>ys-preview</code></td><td>Previews selected files.</td><td>File inputs</td></tr>
+                                <tr><td><code>ys-dropzone</code></td><td>Connects drag/drop to a file input.</td><td><code>ys-dragover</code> styling</td></tr>
+                                <tr><td><code>ys-teleport</code></td><td>Moves markup into another DOM target.</td><td>Modals, overlays, portals</td></tr>
+                                <tr><td><code>ys-slot</code></td><td>Renders captured component children.</td><td>Component templates</td></tr>
+                                <tr><td><code>ys-memo</code></td><td>Skips subtree recompilation while a value is unchanged.</td><td>Stable expensive fragments</td></tr>
+                                <tr><td><code>ys-cloak</code></td><td>Hides markup until compilation.</td><td><code>[ys-cloak]</code> CSS rule</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </section>
+
+                <section class="section" id="server" data-search-item>
+                    <h2>Server Requests</h2>
+                    <p class="lead">YugaJS can submit forms, fetch fragments, swap HTML, morph DOM, update state from JSON, show loading states, cache GET responses, and follow redirects.</p>
+
+                    <div class="grid two">
+                        <article class="card">
+                            <h3><code>ys-get</code></h3>
+                            <p>Runs on click by default, on form submit, on input when <code>ys-trigger="input"</code>, or immediately with <code>ys-trigger="load"</code>.</p>
+                        </article>
+                        <article class="card">
+                            <h3><code>ys-post</code></h3>
+                            <p>Submits forms as <code>FormData</code>, or sends component state as JSON for non-form elements.</p>
+                        </article>
+                    </div>
+
+                    <pre><code>&lt;form ys-post="/users" ys-target="#users" ys-swap="append" ys-reset&gt;
+    &lt;input name="name" placeholder="Name"&gt;
+    &lt;button ys-loading-text="Saving..."&gt;Save&lt;/button&gt;
+&lt;/form&gt;
+
+&lt;div id="users"&gt;&lt;/div&gt;</code></pre>
+
+                    <h3>Search As You Type</h3>
+                    <pre><code>&lt;div ys-data="{ selectedName: '', selectedId: '' }"&gt;
+    &lt;input
+        name="search"
+        ys-get="/select-users"
+        ys-trigger="input"
+        ys-target="#select-results"
+        ys-swap="html"&gt;
+
+    &lt;div id="select-results"&gt;&lt;/div&gt;
+    &lt;strong ys-text="selectedName || 'None'"&gt;&lt;/strong&gt;
+    &lt;input type="hidden" name="user_id" :value="selectedId"&gt;
+&lt;/div&gt;</code></pre>
+
+                    <h3>Request Attributes</h3>
+                    <div class="table-wrap">
+                        <table>
+                            <thead>
+                                <tr><th>Attribute</th><th>Use</th></tr>
+                            </thead>
+                            <tbody>
+                                <tr><td><code>ys-target</code></td><td>CSS selector for the element that receives the response. Defaults to the requesting element.</td></tr>
+                                <tr><td><code>ys-swap</code></td><td><code>html</code>, <code>append</code>, <code>prepend</code>, <code>replace</code>, <code>outer</code>, or <code>morph</code>.</td></tr>
+                                <tr><td><code>ys-trigger</code></td><td><code>load</code> to fetch immediately or <code>input</code> for live GET inputs.</td></tr>
+                                <tr><td><code>ys-cache</code></td><td>GET cache TTL in seconds.</td></tr>
+                                <tr><td><code>ys-loading-class</code></td><td>Class names added while a POST request is running.</td></tr>
+                                <tr><td><code>ys-loading-text</code></td><td>Temporary text shown while a POST request is running.</td></tr>
+                                <tr><td><code>ys-reset</code></td><td>Resets a form after a POST completes.</td></tr>
+                                <tr><td><code>ys-validate</code></td><td>Applies JSON validation errors when the response returns <code>{ ok: false, errors: ... }</code>.</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <h3>Swap Strategies</h3>
+                    <div class="table-wrap" data-search-item>
+                        <table>
+                            <thead>
+                                <tr><th>Strategy</th><th>Behavior</th><th>Use it when</th></tr>
+                            </thead>
+                            <tbody>
+                                <tr><td><code>html</code></td><td>Replaces the target's inner HTML.</td><td>The target is a container for server content.</td></tr>
+                                <tr><td><code>append</code></td><td>Inserts the response at the end of the target.</td><td>Adding rows, messages, logs, or toasts.</td></tr>
+                                <tr><td><code>prepend</code></td><td>Inserts the response at the beginning of the target.</td><td>Newest-first feeds and notifications.</td></tr>
+                                <tr><td><code>replace</code></td><td>Replaces the target element with the response root.</td><td>The server returns a complete replacement node.</td></tr>
+                                <tr><td><code>outer</code></td><td>Replaces the target, or removes it for an empty response.</td><td>Deleting or replacing one item from a list.</td></tr>
+                                <tr><td><code>morph</code></td><td>Morphs the target while preserving useful client-side state.</td><td>Refreshing complex UI with inputs or stateful children.</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <h3>Cache And Uploads</h3>
+                    <pre><code>&lt;button ys-get="/cached-time" ys-target="#result" ys-cache="10"&gt;
+    Load cached time
+&lt;/button&gt;
+
+&lt;button @click="YS.clearCache()"&gt;Clear cache&lt;/button&gt;</code></pre>
+
+                    <pre><code>&lt;body ys-data="{ progress: 0 }"&gt;
+    &lt;form ys-post="/upload" ys-target="#result" enctype="multipart/form-data"&gt;
+        &lt;div ys-dropzone="#file"&gt;Drop file here&lt;/div&gt;
+        &lt;input id="file" type="file" name="file" multiple ys-preview="#preview"&gt;
+        &lt;button&gt;Upload&lt;/button&gt;
+    &lt;/form&gt;
+
+    &lt;div :style="`width:${progress}%`"&gt;&lt;/div&gt;
+    &lt;p ys-text="progress + '%'"&gt;&lt;/p&gt;
+    &lt;div id="preview"&gt;&lt;/div&gt;
+&lt;/body&gt;</code></pre>
+
+                    <h3>JSON Responses</h3>
+                    <pre><code>{
+    "state": { "saved": true },
+    "html": "&lt;li&gt;Aisha&lt;/li&gt;",
+    "redirect": "/dashboard",
+    "replace": false
+}</code></pre>
+                    <p>A response may also redirect using the <code>X-YS-Redirect</code> header.</p>
+
+                    <h3>Action Requests</h3>
+                    <p><code>ys-action</code> posts a JSON payload containing an action name and the current clean scope state. It is useful when a server endpoint behaves like a command handler.</p>
+                    <pre><code>&lt;div ys-data="{ count: 0, message: 'Ready' }"&gt;
+    &lt;button ys-action="/counter-action" ys-send="increment"&gt;+&lt;/button&gt;
+    &lt;button ys-action="/counter-action" ys-send="decrement"&gt;-&lt;/button&gt;
+&lt;/div&gt;</code></pre>
+
+                    <pre><code>{
+    "action": "increment",
+    "state": {
+        "count": 0,
+        "message": "Ready"
+    }
+}</code></pre>
+
+                    <h3>Validation</h3>
+                    <pre><code>&lt;form ys-post="/validate-user" ys-validate ys-target="#result"&gt;
+    &lt;input name="name" placeholder="Name"&gt;
+    &lt;input name="email" placeholder="Email"&gt;
+    &lt;button&gt;Save&lt;/button&gt;
+&lt;/form&gt;</code></pre>
+                    <p>Fields with errors receive <code>ys-invalid</code>. Messages are inserted after fields with <code>ys-error-message</code>.</p>
+
+                    <pre><code>{
+    "ok": false,
+    "errors": {
+        "email": "Email is required"
+    }
+}</code></pre>
+
+                    <h3>Partial Navigation</h3>
+                    <pre><code>&lt;a href="/settings" ys-visit ys-target="#app" ys-swap="morph"&gt;
+    Settings
+&lt;/a&gt;</code></pre>
+
+                    <h3>Request Events</h3>
+                    <pre><code>YS.on('request:start', ({ url, method }) =&gt; {
+    console.log('Starting', method, url)
+})
+
+YS.on('request:finish', ({ url }) =&gt; {
+    if (url.includes('/delete-user')) {
+        document.querySelector('#toast').textContent = 'User deleted'
+    }
+})</code></pre>
+                    <p>Available events include <code>request:start</code>, <code>request:success</code>, <code>request:error</code>, <code>request:finish</code>, and <code>request:validation-error</code>.</p>
+                </section>
+
+                <section class="section" id="streaming" data-search-item>
+                    <h2>Streaming</h2>
+                    <p class="lead">Use <code>ys-stream</code> to open an EventSource connection. Server-sent events can swap fragments, patch state, dispatch browser events, redirect, focus fields, or close the stream.</p>
+
+                    <pre><code>&lt;div ys-data="{ count: 0 }"&gt;
+    &lt;div ys-stream="/stream" ys-target="#messages" ys-swap="append"&gt;&lt;/div&gt;
+    &lt;div id="messages"&gt;&lt;/div&gt;
+&lt;/div&gt;</code></pre>
+
+                    <h3>Supported Event Names</h3>
+                    <div class="table-wrap">
+                        <table>
+                            <thead>
+                                <tr><th>Event</th><th>Behavior</th></tr>
+                            </thead>
+                            <tbody>
+                                <tr><td><code>message</code></td><td>Uses the element's default <code>ys-swap</code>, which defaults to <code>append</code>.</td></tr>
+                                <tr><td><code>append</code>, <code>prepend</code>, <code>html</code>, <code>replace</code>, <code>morph</code></td><td>Swaps the event data into the target with the matching strategy.</td></tr>
+                                <tr><td><code>signal</code></td><td>Parses JSON and applies it to the current scope.</td></tr>
+                                <tr><td><code>dispatch</code></td><td>Parses <code>{ "event": "...", "detail": {} }</code> and dispatches a <code>CustomEvent</code> on <code>window</code>.</td></tr>
+                                <tr><td><code>redirect</code></td><td>Navigates to the event data URL.</td></tr>
+                                <tr><td><code>focus</code></td><td>Focuses the selector in the event data.</td></tr>
+                                <tr><td><code>close</code></td><td>Closes the EventSource connection.</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <h3>Stream Actions</h3>
+                    <pre><code>&lt;div ys-stream="/chat/stream" ys-action-url="/chat/action"&gt;
+    &lt;button ys-stream-action="like"&gt;Like&lt;/button&gt;
+&lt;/div&gt;</code></pre>
+
+                    <h3>Server-Sent Event Payloads</h3>
+                    <pre><code>event: append
+data: &lt;p&gt;New message&lt;/p&gt;
+
+event: signal
+data: {"count": 12, "message": "Updated"}
+
+event: dispatch
+data: {"event":"toast","detail":{"message":"Saved"}}
+
+event: redirect
+data: /dashboard</code></pre>
+
+                    <h3>SSE Signals</h3>
+                    <pre><code>&lt;div ys-sse-signals="/signals"&gt;&lt;/div&gt;</code></pre>
+                    <p>Signal events should include a target selector and a <code>signals</code> object, for example <code>{ "target": "#counter", "signals": { "count": 2 } }</code>.</p>
+
+                    <h3>Stream Events</h3>
+                    <p>Listen with <code>YS.on()</code> for <code>stream:start</code>, <code>stream:message</code>, <code>stream:signal</code>, <code>stream:dispatch</code>, <code>stream:error</code>, <code>stream:close</code>, <code>stream:action:start</code>, <code>stream:action:success</code>, and <code>stream:action:error</code>.</p>
+                </section>
+
+                <section class="section" id="components" data-search-item>
+                    <h2>Components</h2>
+                    <p class="lead">Register named components in JavaScript, then attach them to markup with <code>ys-component</code>. Component data, methods, props, slots, stores, and lifecycle helpers are merged into one reactive scope.</p>
+
+                    <pre><code>YS.component('user-card', {
+    data() {
+        return { open: false }
+    },
+    methods: {
+        toggle() {
+            this.open = !this.open
+        }
+    },
+    init() {
+        console.log('mounted', this.props)
+    }
+})
+
+YS.start()</code></pre>
+
+                    <pre><code>&lt;article ys-component="user-card" ys-props="{ name: 'Hamid' }"&gt;
+    &lt;button @click="toggle()"&gt;Toggle&lt;/button&gt;
+    &lt;p ys-show="open" ys-text="props.name"&gt;&lt;/p&gt;
+&lt;/article&gt;</code></pre>
+
+                    <h3>Props And Slots</h3>
+                    <pre><code>&lt;div ys-component="user-card" ys-props="{ name: 'Aisha', email: 'aisha@example.com' }"&gt;
+    &lt;button @click="alert('Message ' + props.name)"&gt;
+        Message user
+    &lt;/button&gt;
+&lt;/div&gt;
+
+&lt;template id="user-card-template"&gt;
+    &lt;h2 ys-text="props.name"&gt;&lt;/h2&gt;
+    &lt;p ys-text="props.email"&gt;&lt;/p&gt;
+    &lt;div ys-slot&gt;&lt;/div&gt;
+&lt;/template&gt;</code></pre>
+
+                    <h3>Component Data Overrides</h3>
+                    <p>When an element has both <code>ys-component</code> and <code>ys-data</code>, the inline data is merged into the component data. This is useful for multiple instances with different initial state.</p>
+                    <pre><code>&lt;div ys-component="counter"&gt;&lt;/div&gt;
+&lt;div ys-component="counter" ys-data="{ count: 10 }"&gt;&lt;/div&gt;</code></pre>
+
+                    <h3>Component Watchers</h3>
+                    <pre><code>YS.component('counter', {
+    data() {
+        return { count: 0 }
+    },
+    methods: {
+        increment() {
+            this.count++
+        }
+    },
+    init() {
+        this.$watch(
+            function () {
+                return this.count
+            },
+            function (value, oldValue) {
+                console.log('Counter changed:', oldValue, value)
+            }
+        )
+    }
+})</code></pre>
+
+                    <h3>Scope Helpers</h3>
+                    <div class="table-wrap">
+                        <table>
+                            <thead>
+                                <tr><th>Helper</th><th>Description</th></tr>
+                            </thead>
+                            <tbody>
+                                <tr><td><code>$el</code></td><td>The component root element.</td></tr>
+                                <tr><td><code>$store</code></td><td>All registered YugaJS stores.</td></tr>
+                                <tr><td><code>$slot</code></td><td>The original inner HTML captured before component rendering.</td></tr>
+                                <tr><td><code>$watch(getter, callback)</code></td><td>Runs a callback when a reactive value changes and cleans it up with the component.</td></tr>
+                                <tr><td><code>$cleanup(callback)</code></td><td>Registers teardown work for the component.</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <h3>Headless Components</h3>
+                    <p>Install <code>YS.headless</code> to register built-in behavior components such as tabs, disclosure, dialog, dropdown, toggle, popover, menu, combobox, and listbox.</p>
+                    <pre><code>YS.use(YS.headless)
+YS.start()</code></pre>
+                </section>
+
+                <section class="section" id="reactivity" data-search-item>
+                    <h2>Reactivity</h2>
+                    <p class="lead">YugaJS includes small reactive primitives for standalone state, global stores, watchers, computed values, and signals.</p>
+
+                    <div class="grid two">
+                        <article class="card">
+                            <h3>Stores</h3>
+                            <pre><code>const auth = YS.store('auth', {
+    user: null
+}, { persist: true })
+
+auth.user = { name: 'Aisha' }</code></pre>
+                        </article>
+                        <article class="card">
+                            <h3>Signals</h3>
+                            <pre><code>const count = YS.signal(0)
+
+YS.signalEffect(() => {
+    console.log(count())
+})
+
+count.set(1)</code></pre>
+                        </article>
+                    </div>
+
+                    <h3>Stores In Markup</h3>
+                    <pre><code>&lt;div ys-data&gt;
+    &lt;button @click="$store.counter.count++"&gt;+&lt;/button&gt;
+    &lt;span ys-text="$store.counter.count"&gt;&lt;/span&gt;
+&lt;/div&gt;
+
+&lt;script&gt;
+    YS.store('counter', { count: 0 })
+    YS.start()
+&lt;/script&gt;</code></pre>
+
+                    <h3>Persistent Store</h3>
+                    <pre><code>&lt;body ys-data&gt;
+    &lt;button @click="$store.settings.theme = 'light'"&gt;Light&lt;/button&gt;
+    &lt;button @click="$store.settings.theme = 'dark'"&gt;Dark&lt;/button&gt;
+    &lt;strong ys-text="$store.settings.theme"&gt;&lt;/strong&gt;
+    &lt;div ys-effect="document.body.className = $store.settings.theme"&gt;&lt;/div&gt;
+&lt;/body&gt;
+
+&lt;script&gt;
+    YS.store('settings', { theme: 'light' }, { persist: true })
+    YS.start()
+&lt;/script&gt;</code></pre>
+
+                    <h3>Scope And Watch</h3>
+                    <pre><code>YS.start()
+
+const scope = YS.scope('#toast-app')
+
+YS.watch(
+    () =&gt; scope.toasts,
+    toasts =&gt; {
+        toasts.forEach(toast =&gt; {
+            if (toast._timeout) return
+            toast._timeout = true
+
+            setTimeout(() =&gt; {
+                scope.toasts = scope.toasts.filter(item =&gt; item.id !== toast.id)
+            }, 3000)
+        })
+    }
+)</code></pre>
+
+                    <h3>API</h3>
+                    <div class="table-wrap">
+                        <table>
+                            <thead>
+                                <tr><th>Function</th><th>Description</th></tr>
+                            </thead>
+                            <tbody>
+                                <tr><td><code>YS.store(name, value, options)</code></td><td>Creates or reads a global reactive store. Use <code>{ persist: true }</code> to save to localStorage.</td></tr>
+                                <tr><td><code>YS.clearStore(name)</code></td><td>Clears one store, or all stores when no name is passed.</td></tr>
+                                <tr><td><code>YS.effect(callback)</code></td><td>Runs a reactive effect and returns a stop function.</td></tr>
+                                <tr><td><code>YS.watch(getter, callback)</code></td><td>Runs the callback after the getter result changes.</td></tr>
+                                <tr><td><code>YS.computed(getter)</code></td><td>Returns a reactive object with a <code>value</code> property.</td></tr>
+                                <tr><td><code>YS.signal(value)</code></td><td>Creates a function-style signal with <code>.set()</code>, <code>.peek()</code>, and <code>.value</code>.</td></tr>
+                                <tr><td><code>YS.nextTick(callback)</code></td><td>Runs after queued DOM/reactive jobs flush.</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <h3>Computed Values</h3>
+                    <pre><code>YS.component('counter', {
+    data() {
+        return {
+            count: 0,
+            double: null
+        }
+    },
+    init() {
+        this.double = YS.computed(() =&gt; this.count * 2)
+    }
+})</code></pre>
+
+                    <h3>Signals</h3>
+                    <pre><code>const count = YS.signal(0)
+
+YS.signalEffect(() =&gt; {
+    console.log('Count:', count())
+})
+
+count.set(1)
+count.value = 2</code></pre>
+                </section>
+
+                <section class="section" id="dom" data-search-item>
+                    <h2>DOM API</h2>
+                    <p class="lead">The global <code>$</code> helper returns a YugaJS collection with familiar DOM methods.</p>
+
+                    <pre><code>$('.btn').on('click', event =&gt; {
+    console.log('clicked', event.currentTarget)
+})
+
+$('#message')
+    .text('Saved')
+    .addClass('success')
+    .show()</code></pre>
+
+                    <div class="table-wrap">
+                        <table>
+                            <thead>
+                                <tr><th>Category</th><th>Methods</th></tr>
+                            </thead>
+                            <tbody>
+                                <tr><td>Collection</td><td><code>each</code>, <code>filter</code>, <code>first</code>, <code>last</code>, <code>eq</code>, <code>toArray</code></td></tr>
+                                <tr><td>Events</td><td><code>on</code>, delegated <code>on</code>, <code>trigger</code>, <code>ready</code></td></tr>
+                                <tr><td>Content</td><td><code>html</code>, <code>text</code>, <code>val</code>, <code>serialize</code></td></tr>
+                                <tr><td>Attributes</td><td><code>attr</code>, <code>data</code>, <code>css</code></td></tr>
+                                <tr><td>Classes</td><td><code>addClass</code>, <code>removeClass</code>, <code>toggleClass</code>, <code>hasClass</code></td></tr>
+                                <tr><td>Display</td><td><code>show</code>, <code>hide</code>, <code>toggle</code>, <code>fadeIn</code>, <code>fadeOut</code>, <code>fadeToggle</code></td></tr>
+                                <tr><td>Traversal</td><td><code>find</code>, <code>parent</code>, <code>children</code>, <code>closest</code>, <code>siblings</code>, <code>parents</code></td></tr>
+                                <tr><td>Insertion</td><td><code>append</code>, <code>prepend</code>, <code>appendTo</code>, <code>before</code>, <code>after</code>, <code>remove</code></td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <h3>Request Helpers</h3>
+                    <pre><code>await YS.get('/users')
+await YS.post('/users', { name: 'Aisha' })
+await YS.put('/users/1', { name: 'Aisha' })
+await YS.delete('/users/1')</code></pre>
+
+                    <h3>Utilities</h3>
+                    <p>Also available: <code>YS.debounce</code>, <code>YS.throttle</code>, <code>YS.uuid</code>, <code>YS.parseHTML</code>, <code>YS.morph</code>, <code>YS.redirect</code>, <code>YS.scope</code>, <code>YS.data</code>, <code>YS.compile</code>, <code>YS.observe</code>, and <code>YS.clearCache</code>.</p>
+                </section>
+
+                <section class="section" id="morphing" data-search-item>
+                    <h2>DOM Morphing</h2>
+                    <p class="lead">Morphing updates a target with server-rendered HTML while preserving useful client-side state, including form values and attributes owned by reactive directives.</p>
+
+                    <h3>Request Morphing</h3>
+                    <pre><code>&lt;button ys-get="/profile" ys-target="#profile" ys-swap="morph"&gt;
+    Refresh profile
+&lt;/button&gt;
+
+&lt;section id="profile"&gt;
+    Current profile markup
+&lt;/section&gt;</code></pre>
+
+                    <h3>Programmatic Morphing</h3>
+                    <pre><code>YS.morph(
+    document.querySelector('#profile'),
+    '&lt;section id="profile"&gt;&lt;h2&gt;Aisha&lt;/h2&gt;&lt;/section&gt;'
+)</code></pre>
+
+                    <h3>What Is Preserved</h3>
+                    <div class="grid two">
+                        <article class="card">
+                            <h3>Form State</h3>
+                            <p>Inputs, textareas, and selects keep their current values during morph updates.</p>
+                        </article>
+                        <article class="card">
+                            <h3>Managed Attributes</h3>
+                            <p>Reactive attributes owned by directives like <code>ys-class</code>, <code>ys-show</code>, <code>ys-bind</code>, and <code>ys-cloak</code> are preserved.</p>
+                        </article>
+                    </div>
+
+                    <p>Use <code>morph</code> for complex refreshed UI. Use <code>html</code>, <code>append</code>, or <code>prepend</code> for simple fragments where preserving existing DOM state is not important.</p>
+                </section>
+
+                <section class="section" id="plugins" data-search-item>
+                    <h2>Plugins</h2>
+                    <p class="lead">Plugins receive the YugaJS object and can register components, directives, collection methods, events, or helper functions.</p>
+
+                    <pre><code>function ToastPlugin(YS, options = {}) {
+    YS.toast = message =&gt; {
+        const el = document.createElement('div')
+        el.textContent = message
+        document.body.appendChild(el)
+        setTimeout(() =&gt; el.remove(), options.duration || 2400)
+    }
+}
+
+YS.use(ToastPlugin, { duration: 3000 })
+YS.toast('Saved')</code></pre>
+
+                    <h3>Collection Plugins</h3>
+                    <pre><code>YS.fn('highlight', function () {
+    return this.each(el =&gt; {
+        el.style.outline = '2px solid #137b67'
+    })
+})
+
+$('.card').highlight()</code></pre>
+
+                    <h3>Custom Directives</h3>
+                    <pre><code>YS.directive('focus', {
+    mounted(el) {
+        el.focus()
+    }
+})</code></pre>
+
+                    <h3>Object Plugins</h3>
+                    <pre><code>const HelloPlugin = {
+    name: 'hello-plugin',
+
+    install(YS, options) {
+        YS.directive('hello', {
+            mounted(el) {
+                el.textContent = options.message || 'Hello from plugin'
+            }
+        })
+    }
+}
+
+YS.use(HelloPlugin, {
+    message: 'Hello from YugaJS'
+})</code></pre>
+
+                    <h3>Installed Plugins</h3>
+                    <pre><code>console.log(YS.plugins())</code></pre>
+                    <p>YugaJS tracks installed plugins and avoids installing the same plugin twice.</p>
+                </section>
+
+                <section class="section" id="examples" data-search-item>
+                    <h2>Practical Examples</h2>
+                    <p class="lead">These patterns come from the included examples and playground files.</p>
+
+                    <h3>Todo List</h3>
+                    <pre><code>&lt;div ys-data="{ newTodo: '', todos: ['Learn compiler', 'Build directives'] }"&gt;
+    &lt;input ys-model="newTodo" placeholder="New todo"&gt;
+
+    &lt;button @click="todos = [...todos, newTodo]; newTodo = ''"&gt;
+        Add
+    &lt;/button&gt;
+
+    &lt;ul&gt;
+        &lt;li ys-for="todo, index in todos"&gt;
+            &lt;span ys-text="todo"&gt;&lt;/span&gt;
+            &lt;button @click="todos = todos.filter((_, i) =&gt; i !== index)"&gt;
+                Remove
+            &lt;/button&gt;
+        &lt;/li&gt;
+    &lt;/ul&gt;
+
+    &lt;p ys-if="todos.length === 0"&gt;No todos yet&lt;/p&gt;
+&lt;/div&gt;</code></pre>
+
+                    <h3>Keyboard Command Palette</h3>
+                    <pre><code>&lt;div ys-data="{ open:false, search:'', selected:'None', commands:['Open File','Save File','Settings'] }"
+    ys-key:ctrl+k.window="open=true"
+    ys-key:escape.window="open=false"&gt;
+
+    &lt;p&gt;Selected: &lt;strong ys-text="selected"&gt;&lt;/strong&gt;&lt;/p&gt;
+
+    &lt;div ys-show="open" ys-cloak&gt;
+        &lt;input ys-model="search" placeholder="Search commands"&gt;
+
+        &lt;button
+            ys-for="cmd in commands.filter(c =&gt; c.toLowerCase().includes(search.toLowerCase()))"
+            @click="selected = cmd; open = false"
+            ys-text="cmd"&gt;
+        &lt;/button&gt;
+    &lt;/div&gt;
+&lt;/div&gt;</code></pre>
+
+                    <h3>Reusable Toasts</h3>
+                    <pre><code>&lt;div id="toast-app" ys-data="{ toasts: [] }"&gt;
+    &lt;button @click="toasts = [...toasts, { id: Date.now(), message: 'Saved successfully' }]"&gt;
+        Show toast
+    &lt;/button&gt;
+
+    &lt;div ys-for="toast in toasts"&gt;
+        &lt;span ys-text="toast.message"&gt;&lt;/span&gt;
+    &lt;/div&gt;
+&lt;/div&gt;</code></pre>
+
+                    <h3>Server Loaded Table</h3>
+                    <pre><code>&lt;div
+    ys-get="/datatable"
+    ys-trigger="load"
+    ys-target="#table"
+    ys-swap="html"&gt;
+&lt;/div&gt;
+
+&lt;form ys-get="/datatable" ys-target="#table" ys-swap="html"&gt;
+    &lt;input name="search" placeholder="Search..."&gt;
+&lt;/form&gt;
+
+&lt;div id="table"&gt;Loading...&lt;/div&gt;</code></pre>
+                </section>
+
+                
+            </main>
+
+            <footer class="footer">
+                <p>YugaJS documentation.</p>
+            </footer>
+        </div>
+    </div>
+    <script src="app.js"></script>
+</body>
+</html>

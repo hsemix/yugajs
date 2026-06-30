@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Keyed ys-for</title>
+</head>
+
+<body>
+
+    <div ys-data="{
+        todos: [
+            { id: 1, title: 'Learn YugaJS' },
+            { id: 2, title: 'Build keyed loops' },
+            { id: 3, title: 'Preserve DOM state' }
+        ],
+        count: 10
+    }">
+
+        <h1>Keyed ys-for</h1>
+
+        <button @click="todos = [
+            { id: Date.now(), title: 'New todo ' + Date.now() },
+            ...todos
+        ]">
+            Add To Top
+        </button>
+
+        <button @click="todos = [...todos].reverse()">
+            Reverse
+        </button>
+
+        <button @click="todos = [
+            ...todos,
+            { id: Date.now(), title: 'New todo ' + Date.now() }
+        ]">
+            Add To Bottom
+        </button>
+
+        <!-- <ul>
+            <template ys-for="todo, index in todos" ys-key="todo.id">
+                <li>
+                    <strong ys-text="index"></strong>
+                    -
+                    <span ys-text="todo.title"></span>
+
+                    <input placeholder="Type here to test DOM preservation">
+                </li>
+            </template>
+        </ul> -->
+
+        <ul class="space-y-2">
+            <template
+                ys-for="todo in todos"
+                ys-key="todo.id"
+                ys-transition
+                ys-duration="250"
+            >
+                <li class="rounded-md border p-3">
+                    <span ys-text="todo.title"></span>
+                </li>
+            </template>
+        </ul>
+
+        <div id="app" ys-data="{ count: 20 }">
+            <button @click="count--">-</button>
+            <span ys-text="count"></span>
+            <button @click="count++">+</button>
+        </div>
+
+    </div>
+
+    <script type="module" src="../src/ys.js"></script>
+    <script type="module">
+        // YS.start();
+        YS.data('#app', {
+            count: 0
+        });
+        YS.start();
+    </script>
+
+</body>
+
+</html>

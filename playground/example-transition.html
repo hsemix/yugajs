@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>DOM API</title>
+    <style>
+        [ys-invalid] {
+            border-color: red;
+        }
+
+        [ys-error-message] {
+            color: red;
+            font-size: 13px;
+            margin-top: 4px;
+        }
+    </style>
+</head>
+
+<body>
+    <div ys-data="{ open: false }">
+        <button @click="open = true">
+            Open Modal
+        </button>
+
+        <div
+            class="overlay"
+            ys-show="open"
+            ys-transition
+            ys-duration="250"
+            ys-cloak
+            @click.self="open = false"
+        >
+            <div class="modal">
+                <h2>Animated Modal</h2>
+
+                <button @click="open = false">
+                    Close
+                </button>
+            </div>
+        </div>
+    </div> 
+
+    <hr>
+
+    <div ys-data="{ open: false }">
+        <button @click="open = !open">
+            Toggle
+        </button>
+
+        <div
+            ys-show="open"
+            ys-transition
+            ys-cloak
+        >
+            Dropdown content
+        </div>
+    </div>
+
+    <hr>
+
+    <div ys-data="{ open: false }">
+        <button @click="open = !open">
+            Toggle
+        </button>
+
+        <div ys-if="open" ys-transition ys-duration="300">
+            I mount and unmount with animation.
+        </div>
+    </div>
+
+    <script type="module" src="../src/ys.js"></script>
+    <script type="module">
+       YS.start();
+    </script>
+</body>
+
+</html>

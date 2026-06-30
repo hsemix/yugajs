@@ -1,0 +1,39 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>Templates</title>
+</head>
+
+<body>
+    <div ys-data="{ loggedIn: false, users: [{ name: 'Ali' }, { name: 'Aisha' }] }">
+
+        <button @click="loggedIn = !loggedIn">
+            Toggle Login
+        </button>
+
+        <template ys-if="loggedIn">
+            <div class="rounded border p-4">
+                Welcome back
+            </div>
+        </template>
+
+        <ul>
+            <template ys-for="user, index in users">
+                <li>
+                    <span ys-text="index"></span>
+                    -
+                    <span ys-text="user.name"></span>
+                </li>
+            </template>
+        </ul>
+
+    </div>
+
+    <script type="module" src="../src/ys.js"></script>
+    <script type="module">
+        YS.start();
+    </script>
+</body>
+
+</html>

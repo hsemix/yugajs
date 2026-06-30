@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Stream</title>
+</head>
+<body ys-data>
+    <h1>Stream</h1>
+
+    <div
+        ys-stream="index.php?path=/stream"
+        ys-target="#messages"
+        ys-swap="append">
+    </div>
+
+    <div id="messages">
+        Waiting for stream...
+    </div>
+
+    <script type="module" src="../src/ys.js"></script>
+    <script type="module">
+        YS.start();
+    </script>
+</body>
+</html>

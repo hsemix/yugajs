@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Server GET/POST</title>
+</head>
+<body ys-data>
+    <h1>Server GET/POST</h1>
+
+    <button
+        ys-get="index.php?path=/users"
+        ys-target="#users"
+        ys-swap="html">
+        Load Users
+    </button>
+
+    <button ys-get="http://localhost/yugajs/users.php" ys-target="#users" ys-swap="html" ys-loading-class="loading" ys-loading-text="Loading...">
+            Load Users 2
+        </button>
+
+    <div id="users">
+        Users will load here.
+    </div>
+
+    <hr>
+
+    <form
+        ys-post="index.php?path=/users"
+        ys-target="#users"
+        ys-swap="append">
+        <input name="name" placeholder="Name">
+        <button type="submit">Save User</button>
+    </form>
+
+    <script type="module" src="../src/ys.js"></script>
+    <script type="module">
+        YS.start();
+        YS.nextTick(() => {
+            console.log('DOM has updated')
+        })
+        
+    </script>
+</body>
+</html>

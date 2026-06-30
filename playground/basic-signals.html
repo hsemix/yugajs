@@ -1,0 +1,35 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JS - Library</title>
+</head>
+<body>
+
+    <button id="inc">Increment</button>
+    <div id="counter">0</div>
+
+    <script type="module" src="../src/ys.js"></script>
+    <script type="module">
+        YS.start();
+
+        const count = YS.signal(0);
+
+        YS.signalEffect(() => {
+            $('#counter').text(`Count: ${count.value}`);
+        });
+
+        $('#inc').on('click', () => { count.value++; });
+
+        const doubled = YS.computed(() => {
+            return count.value * 2
+        });
+
+        YS.effect(() => {
+            console.log(doubled.value)
+        });
+    </script>
+</body>
+</html>

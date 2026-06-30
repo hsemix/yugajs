@@ -1,0 +1,26 @@
+{
+  "name": "ys",
+  "version": "0.0.1",
+  "type": "module",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "test": "vitest",
+    "dev": "vite",
+    "build": "vite build",
+    "docs:serve": "python3 -m http.server 8080 --directory docs"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "jsdom": "^29.1.1",
+    "terser": "^5.48.0",
+    "vite": "^8.0.14",
+    "vitest": "^4.1.7"
+  },
+  "dependencies": {
+    "idiomorph": "^0.7.4",
+    "morphdom": "^2.7.8"
+  }
+}

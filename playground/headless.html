@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>JS - Library</title>
+</head>
+
+<body>
+
+    <div ys-component="headless-tabs" ys-props="{ defaultValue: 'settings' }">
+        <button @click="select('overview')">
+            Overview
+        </button>
+
+        <button @click="select('settings')">
+            Settings
+        </button>
+
+        <div ys-show="isSelected('overview')" ys-cloak>
+            Overview content
+        </div>
+
+        <div ys-show="isSelected('settings')" ys-cloak>
+            Settings content
+        </div>
+    </div>
+
+    <div ys-component="headless-dialog">
+
+        <button class="rounded-md border px-4 py-2" @click="show()">
+            Open Dialog
+        </button>
+
+        <div ys-show="open" ys-cloak class="fixed inset-0 z-50 bg-black/40" @click.self="close()">
+            <div class="mx-auto mt-32 max-w-md rounded-xl bg-white p-6 shadow-xl">
+                <h2 class="text-lg font-semibold">
+                    Headless Dialog
+                </h2>
+
+                <p class="mt-2 text-sm text-slate-500">
+                    Dialog content
+                </p>
+
+                <button class="mt-4 rounded-md border px-4 py-2" @click="close()">
+                    Close
+                </button>
+            </div>
+        </div>
+
+    </div>
+
+    <div ys-component="headless-disclosure" ys-props="{ defaultOpen: true }" class="rounded-xl border p-4">
+        <button class="w-full text-left" @click="toggle()">
+            Toggle Disclosure
+        </button>
+
+        <div ys-show="open" ys-cloak class="mt-4">
+            Disclosure content
+        </div>
+    </div>
+
+    <div ys-component="headless-dropdown" class="relative inline-block">
+
+        <button class="rounded-md border px-4 py-2" @click="toggle()">
+            Dropdown
+        </button>
+
+        <div ys-show="open" ys-cloak class="absolute right-0 mt-2 w-56 rounded-xl border bg-white p-2 shadow-xl"
+            @click.outside="close()">
+            <button class="block w-full rounded-md px-3 py-2 text-left hover:bg-slate-100">
+                Profile
+            </button>
+
+            <button class="block w-full rounded-md px-3 py-2 text-left hover:bg-slate-100">
+                Settings
+            </button>
+
+            <button class="block w-full rounded-md px-3 py-2 text-left hover:bg-slate-100">
+                Logout
+            </button>
+        </div>
+
+        <div ys-component="headless-toggle">
+
+            <button @click="toggle()" class="rounded-md border px-4 py-2" ys-class="{
+            'bg-slate-900 text-white': pressed
+        }">
+                Toggle
+            </button>
+
+        </div>
+
+        <div ys-component="headless-toggle">
+
+            <button @click="toggle()" class="rounded-md border px-4 py-2">
+                <span ys-text="pressed ? 'Disable AI' : 'Enable AI'"></span>
+            </button>
+
+        </div>
+
+        <div ys-component="headless-popover" class="relative inline-block">
+
+            <button @click="toggle()" class="rounded-md border px-4 py-2">
+                Open Popover
+            </button>
+
+            <div ys-show="open" ys-cloak
+                class="absolute left-0 top-full z-50 mt-2 w-72 rounded-xl border bg-white p-4 shadow-xl"
+                @click.outside="close()">
+                Popover content
+            </div>
+
+        </div>
+
+    </div>
+
+
+
+    <script type="module" src="../src/ys.js"></script>
+    <script type="module">
+        YS.use(YS.headless)
+        YS.start();
+    </script>
+</body>
+
+</html>

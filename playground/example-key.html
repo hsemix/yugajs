@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <title>DOM API</title>
+    <style>
+        [ys-invalid] {
+            border-color: red;
+        }
+
+        [ys-error-message] {
+            color: red;
+            font-size: 13px;
+            margin-top: 4px;
+        }
+    </style>
+</head>
+
+<body>
+    <div ys-data="{ open: false }">
+        <button @click="open = true">
+            Open
+        </button>
+
+        <div ys-show="open" ys-key:escape.window="open = false" ys-cloak>
+            Modal content
+        </div>
+    </div>
+
+    <script type="module" src="../src/ys.js"></script>
+    <script type="module">
+        YS.start();
+    </script>
+</body>
+
+</html>
