@@ -43,12 +43,12 @@ Expressions run in the current scope and can access helpers such as `$el`, `$eve
 
 ## Documentation
 
-- [Installation](installation.md)
-- [Core API](core.md)
-- [Directives](directives.md)
-- [Server Requests](server.md)
-- [Streaming](streaming.md)
-- [DOM Morphing](morphing.md)
-- [Plugins](plugins.md)
-- [Examples](examples.md)
-- <a href="https://hsemix.github.io/yugajs/" target="_blank">See full documentation</a>
+- [Installation](docs/installation.md)
+- [Core API](docs/core.md)
+- [Directives](docs/directives.md)
+- [Server Requests](docs/server.md)
+- [Streaming](docs/streaming.md)
+- [DOM Morphing](docs/morphing.md)
+- [Plugins](docs/plugins.md)
+- [Examples](docs/examples.md)
+- [See full documentation](https://hsemix.github.io/yugajs/)
