@@ -51,3 +51,4 @@ Expressions run in the current scope and can access helpers such as `$el`, `$eve
 - [DOM Morphing](morphing.md)
 - [Plugins](plugins.md)
 - [Examples](examples.md)
+- <a href="https://hsemix.github.io/yugajs/">See full documentation</a>
