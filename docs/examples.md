@@ -233,6 +233,146 @@ data: {"count": 2}
 </script>
 ```
 
+## Headless Components
+
+Install the headless plugin before starting YugaJS. Headless components provide state and methods; you provide markup, styling, transitions, and accessibility attributes.
+
+```html
+<script src="/dist/ys.min.js"></script>
+<script>
+    YS.use(YS.headless)
+    YS.start()
+</script>
+```
+
+### Headless Tabs
+
+```html
+<div ys-component="headless-tabs" ys-props="{ defaultValue: 'settings' }">
+    <div role="tablist">
+        <button
+            role="tab"
+            @click="select('overview')"
+            :aria-selected="isSelected('overview')"
+            ys-class="{ active: isSelected('overview') }">
+            Overview
+        </button>
+
+        <button
+            role="tab"
+            @click="select('settings')"
+            :aria-selected="isSelected('settings')"
+            ys-class="{ active: isSelected('settings') }">
+            Settings
+        </button>
+    </div>
+
+    <section role="tabpanel" ys-show="isSelected('overview')" ys-cloak>
+        Overview content
+    </section>
+
+    <section role="tabpanel" ys-show="isSelected('settings')" ys-cloak>
+        Settings content
+    </section>
+</div>
+```
+
+### Headless Dialog
+
+```html
+<div ys-component="headless-dialog" ys-key:escape.window="close()">
+    <button @click="show()">Open dialog</button>
+
+    <div ys-show="open" ys-transition ys-cloak @click.self="close()">
+        <section role="dialog" aria-modal="true" aria-labelledby="dialog-title">
+            <h2 id="dialog-title">Delete user</h2>
+            <p>This action cannot be undone.</p>
+
+            <button @click="close()">Cancel</button>
+            <button ys-post="/users/delete" @click="close()">Delete</button>
+        </section>
+    </div>
+</div>
+```
+
+### Headless Menu
+
+```html
+<div
+    ys-component="headless-menu"
+    ys-data="{ items: ['Profile', 'Settings', 'Logout'], selected: '' }"
+    ys-key:arrowdown="next(items.length)"
+    ys-key:arrowup="prev(items.length)"
+    ys-key:escape="close()">
+
+    <button @click="toggle()">Open menu</button>
+
+    <div role="menu" ys-show="open" ys-cloak>
+        <button
+            role="menuitem"
+            ys-for="item, index in items"
+            ys-class="{ active: activeIndex === index }"
+            @mouseenter="activeIndex = index"
+            @click="selected = item; close()">
+            <span ys-text="item"></span>
+        </button>
+    </div>
+
+    <p>Selected: <span ys-text="selected || 'None'"></span></p>
+</div>
+```
+
+### Headless Listbox
+
+```html
+<div
+    ys-component="headless-listbox"
+    ys-props="{ defaultValue: 'pro' }"
+    ys-data="{ plans: ['free', 'pro', 'enterprise'] }">
+
+    <button @click="toggle()" :aria-expanded="open">
+        <span ys-text="value || 'Choose plan'"></span>
+    </button>
+
+    <div role="listbox" ys-show="open" ys-cloak>
+        <button
+            role="option"
+            ys-for="plan in plans"
+            :aria-selected="value === plan"
+            ys-class="{ active: value === plan }"
+            @click="select(plan)">
+            <span ys-text="plan"></span>
+        </button>
+    </div>
+</div>
+```
+
+### Headless Combobox
+
+```html
+<div
+    ys-component="headless-combobox"
+    ys-data="{ people: ['Ali', 'Aisha', 'Musa', 'Hamid'] }"
+    ys-key:escape="close()">
+
+    <input
+        ys-model="query"
+        @focus="show()"
+        placeholder="Search people">
+
+    <div role="listbox" ys-show="open" ys-cloak>
+        <button
+            role="option"
+            ys-for="person in people.filter(name => name.toLowerCase().includes(query.toLowerCase()))"
+            @click="select(person); query = person">
+            <span ys-text="person"></span>
+        </button>
+    </div>
+
+    <p>Selected: <span ys-text="selected || 'None'"></span></p>
+</div>
+```
+
 ## Persistent Theme Store
 
 ```html
