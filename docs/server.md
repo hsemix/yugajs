@@ -23,19 +23,29 @@ On a form, `ys-get` serializes form data into the query string.
 </form>
 ```
 
-## GET Triggers
+## Request Triggers
 
 ```html
 <div ys-get="/notifications" ys-trigger="load"></div>
 <input name="q" ys-get="/search" ys-trigger="input" ys-target="#results">
+<div ys-get="/stats" ys-trigger="every 5s"></div>
+<div ys-get="/next-page" ys-trigger="intersect.once"></div>
 ```
 
-Supported `ys-trigger` values:
+`ys-trigger` works with GET and mutation directives. It accepts comma-separated triggers, any DOM event, and these special triggers:
 
 - `load`
-- `input`
+- `every 500ms` or `every 5s`
+- `intersect` (also available as `visible`), with optional `.once` and `.threshold.0.5`
 
-Without `ys-trigger`, buttons and links run on click, and forms run on submit.
+Event triggers support `.once`, `.prevent`, `.stop`, `.capture`, `.passive`, `.window`, `.document`, `.debounce[.duration]`, `.throttle[.duration]`, and keyboard modifiers such as `.enter`, `.escape`, `.ctrl`, and `.shift`.
+
+```html
+<input ys-get="/search" ys-trigger="input.debounce.300ms">
+<button ys-post="/save" ys-trigger="click.once, keydown.ctrl.enter">Save</button>
+```
+
+Without `ys-trigger`, forms run on submit and other elements run on click.
 
 ## Server-powered Search
 
@@ -59,9 +69,9 @@ The playground uses `ys-trigger="input"` for search and select-style widgets.
 </div>
 ```
 
-## `ys-post`
+## Mutation Directives
 
-Runs a POST request.
+Use `ys-post`, `ys-put`, `ys-patch`, and `ys-delete` for the corresponding HTTP methods. They share response swapping, loading, validation, redirect, reset, and trigger behavior.
 
 ```html
 <form ys-post="/users" ys-target="#users" ys-swap="append" ys-reset>
@@ -72,13 +82,37 @@ Runs a POST request.
 <ul id="users"></ul>
 ```
 
-Forms are sent as `FormData`. Non-form elements send the current component state as JSON.
+Forms are sent as `FormData`. Non-form elements send the current component state as JSON by default. Use `ys-send` to provide a specific payload or `ys-no-body` to omit it.
 
 ```html
-<button ys-post="/counter" ys-target="#counter">
-    Save current state
+<button ys-patch="/users/15" ys-send="{ active: false }">
+    Deactivate
+</button>
+
+<button ys-delete="/users/15" ys-no-body>Delete</button>
+```
+
+## Headers and CSRF
+
+Configure headers globally before calling `YS.start()`. `headers` may be an object or a function that returns an object. Per-request `ys-headers` expressions are supported by `ys-get` and override matching global values.
+
+```html
+<meta name="csrf-token" content="your-token">
+<script>
+YS.config({
+    headers: { Accept: 'application/json' },
+    csrf: true
+})
+
+YS.start()
+</script>
+
+<button ys-get="/profile" ys-headers="{ 'X-View': 'compact' }">
+    Load profile
 </button>
 ```
+
+With `csrf: true`, YugaJS reads the `csrf-token` meta tag and sends it as `X-CSRF-TOKEN`. Customize those names with `csrf: { meta: 'csrf', header: 'X-CSRF' }`.
 
 ## Swap Strategies
 
@@ -99,11 +133,14 @@ Use `ys-swap` to choose how the response is applied.
 | --- | --- |
 | `ys-target` | CSS selector for the response target |
 | `ys-swap` | Swap strategy |
-| `ys-trigger` | GET trigger mode |
+| `ys-trigger` | One or more request triggers and modifiers |
+| `ys-send` | Evaluated JSON payload for non-form mutations |
+| `ys-no-body` | Sends a mutation request without a body |
+| `ys-headers` | Evaluated per-request headers for GET |
 | `ys-cache` | GET cache time-to-live in seconds |
-| `ys-loading-class` | Classes added during POST |
-| `ys-loading-text` | Temporary button or element text during POST |
-| `ys-reset` | Resets a form after POST |
+| `ys-loading-class` | Classes added during a mutation request |
+| `ys-loading-text` | Temporary button or element text during a mutation request |
+| `ys-reset` | Resets a form after a mutation completes |
 | `ys-validate` | Applies JSON validation errors |
 
 ## Request Cache

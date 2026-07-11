@@ -283,6 +283,7 @@ npm run build
                                 <tr><td><code>ys-key</code></td><td>Handles keyboard shortcuts.</td><td><code>.window</code>, combos like <code>ctrl+k</code></td></tr>
                                 <tr><td><code>ys-get</code></td><td>Fetches server HTML or JSON with GET.</td><td><code>ys-target</code>, <code>ys-swap</code>, <code>ys-trigger</code></td></tr>
                                 <tr><td><code>ys-post</code></td><td>Submits forms or state with POST.</td><td><code>ys-validate</code>, <code>ys-reset</code>, loading attributes</td></tr>
+                                <tr><td><code>ys-put</code> / <code>ys-patch</code> / <code>ys-delete</code></td><td>Sends PUT, PATCH, or DELETE mutations.</td><td><code>ys-send</code>, <code>ys-no-body</code>, <code>ys-trigger</code></td></tr>
                                 <tr><td><code>ys-action</code></td><td>Sends an action name and clean state as JSON.</td><td><code>ys-send</code></td></tr>
                                 <tr><td><code>ys-stream</code></td><td>Opens an EventSource stream.</td><td><code>ys-target</code>, <code>ys-swap</code>, <code>ys-action-url</code></td></tr>
                                 <tr><td><code>ys-stream-action</code></td><td>Posts actions from inside a stream context.</td><td><code>ys-action-url</code></td></tr>
@@ -302,16 +303,16 @@ npm run build
 
                 <section class="section" id="server" data-search-item>
                     <h2>Server Requests</h2>
-                    <p class="lead">YugaJS can submit forms, fetch fragments, swap HTML, morph DOM, update state from JSON, show loading states, cache GET responses, and follow redirects.</p>
+                    <p class="lead">YugaJS can submit forms, send GET/POST/PUT/PATCH/DELETE requests, swap HTML, morph DOM, update state from JSON, show loading states, cache GET responses, and follow redirects.</p>
 
                     <div class="grid two">
                         <article class="card">
                             <h3><code>ys-get</code></h3>
-                            <p>Runs on click by default, on form submit, on input when <code>ys-trigger="input"</code>, or immediately with <code>ys-trigger="load"</code>.</p>
+                            <p>Runs on click by default or on form submit. Use <code>ys-trigger</code> for DOM events, load, polling, intersection, modifiers, or multiple triggers.</p>
                         </article>
                         <article class="card">
-                            <h3><code>ys-post</code></h3>
-                            <p>Submits forms as <code>FormData</code>, or sends component state as JSON for non-form elements.</p>
+                            <h3>Mutation directives</h3>
+                            <p><code>ys-post</code>, <code>ys-put</code>, <code>ys-patch</code>, and <code>ys-delete</code> submit forms as <code>FormData</code>, or send JSON for non-form elements.</p>
                         </article>
                     </div>
 
@@ -321,6 +322,23 @@ npm run build
 &lt;/form&gt;
 
 &lt;div id="users"&gt;&lt;/div&gt;</code></pre>
+
+                    <h3>PUT, PATCH, DELETE, and Request Bodies</h3>
+                    <p>Non-form mutations send the current scope as <code>{ state: ... }</code>. Use <code>ys-send</code> for a specific evaluated payload, or <code>ys-no-body</code> to omit the request body.</p>
+                    <pre><code>&lt;button ys-patch="/users/15" ys-send="{ active: false }"&gt;
+    Deactivate
+&lt;/button&gt;
+
+&lt;button ys-delete="/users/15" ys-no-body&gt;Delete&lt;/button&gt;
+
+&lt;div ys-put="/heartbeat" ys-trigger="every 30s" ys-no-body&gt;&lt;/div&gt;</code></pre>
+
+                    <h3>Request Triggers</h3>
+                    <p><code>ys-trigger</code> accepts comma-separated triggers on GET and mutation directives. Use any DOM event, <code>load</code>, <code>every 500ms</code>/<code>every 5s</code>, or <code>intersect</code> (also <code>visible</code>).</p>
+                    <pre><code>&lt;input ys-get="/search" ys-trigger="input.debounce.300ms"&gt;
+&lt;div ys-get="/next-page" ys-trigger="intersect.once.threshold.0.5"&gt;&lt;/div&gt;
+&lt;button ys-post="/save" ys-trigger="click.once, keydown.ctrl.enter"&gt;Save&lt;/button&gt;</code></pre>
+                    <p>Event modifiers include <code>once</code>, <code>prevent</code>, <code>stop</code>, <code>capture</code>, <code>passive</code>, <code>window</code>, <code>document</code>, <code>debounce</code>, <code>throttle</code>, and keyboard modifiers such as <code>enter</code>, <code>escape</code>, <code>ctrl</code>, and <code>shift</code>.</p>
 
                     <h3>Search As You Type</h3>
                     <pre><code>&lt;div ys-data="{ selectedName: '', selectedId: '' }"&gt;
@@ -345,15 +363,34 @@ npm run build
                             <tbody>
                                 <tr><td><code>ys-target</code></td><td>CSS selector for the element that receives the response. Defaults to the requesting element.</td></tr>
                                 <tr><td><code>ys-swap</code></td><td><code>html</code>, <code>append</code>, <code>prepend</code>, <code>replace</code>, <code>outer</code>, or <code>morph</code>.</td></tr>
-                                <tr><td><code>ys-trigger</code></td><td><code>load</code> to fetch immediately or <code>input</code> for live GET inputs.</td></tr>
+                                <tr><td><code>ys-trigger</code></td><td>One or more request triggers, optionally with event, timing, target, intersection, and keyboard modifiers.</td></tr>
+                                <tr><td><code>ys-send</code></td><td>Evaluated JSON payload for a non-form mutation.</td></tr>
+                                <tr><td><code>ys-no-body</code></td><td>Sends a mutation request without a body.</td></tr>
+                                <tr><td><code>ys-headers</code></td><td>Evaluated per-request headers for GET; matching values override global headers.</td></tr>
                                 <tr><td><code>ys-cache</code></td><td>GET cache TTL in seconds.</td></tr>
-                                <tr><td><code>ys-loading-class</code></td><td>Class names added while a POST request is running.</td></tr>
-                                <tr><td><code>ys-loading-text</code></td><td>Temporary text shown while a POST request is running.</td></tr>
-                                <tr><td><code>ys-reset</code></td><td>Resets a form after a POST completes.</td></tr>
+                                <tr><td><code>ys-loading-class</code></td><td>Class names added while a mutation request is running.</td></tr>
+                                <tr><td><code>ys-loading-text</code></td><td>Temporary text shown while a mutation request is running.</td></tr>
+                                <tr><td><code>ys-reset</code></td><td>Resets a form after a mutation completes.</td></tr>
                                 <tr><td><code>ys-validate</code></td><td>Applies JSON validation errors when the response returns <code>{ ok: false, errors: ... }</code>.</td></tr>
                             </tbody>
                         </table>
                     </div>
+
+                    <h3>Global Headers and CSRF</h3>
+                    <p>Call <code>YS.config()</code> before <code>YS.start()</code>. Global headers may be an object or a function. Enabling CSRF reads a token from a meta tag on every request.</p>
+                    <pre><code>&lt;meta name="csrf-token" content="your-token"&gt;
+&lt;script&gt;
+YS.config({
+    headers: { Accept: 'application/json' },
+    csrf: true
+})
+YS.start()
+&lt;/script&gt;
+
+&lt;button ys-get="/profile" ys-headers="{ 'X-View': 'compact' }"&gt;
+    Load profile
+&lt;/button&gt;</code></pre>
+                    <p>By default the token is read from <code>meta[name="csrf-token"]</code> and sent as <code>X-CSRF-TOKEN</code>. Customize this with <code>csrf: { meta: 'csrf', header: 'X-CSRF' }</code>.</p>
 
                     <h3>Swap Strategies</h3>
                     <div class="table-wrap" data-search-item>
@@ -583,184 +620,9 @@ YS.start()</code></pre>
                     </div>
 
                     <h3>Headless Components</h3>
-                    <p>Install <code>YS.headless</code> to register behavior-only components such as tabs, disclosure, dialog, dropdown, toggle, popover, menu, combobox, and listbox. They manage state and methods; you provide markup, styling, transitions, and accessibility attributes.</p>
+                    <p>Install <code>YS.headless</code> to register built-in behavior components such as tabs, disclosure, dialog, dropdown, toggle, popover, menu, combobox, and listbox.</p>
                     <pre><code>YS.use(YS.headless)
 YS.start()</code></pre>
-
-                    <h3>Headless Component Reference</h3>
-                    <div class="table-wrap" data-search-item>
-                        <table>
-                            <thead>
-                                <tr><th>Component</th><th>State</th><th>Methods</th></tr>
-                            </thead>
-                            <tbody>
-                                <tr><td><code>headless-tabs</code></td><td><code>value</code></td><td><code>select(value)</code>, <code>isSelected(value)</code></td></tr>
-                                <tr><td><code>headless-disclosure</code></td><td><code>open</code></td><td><code>toggle()</code>, <code>show()</code>, <code>close()</code></td></tr>
-                                <tr><td><code>headless-dialog</code></td><td><code>open</code></td><td><code>show()</code>, <code>close()</code>, <code>toggle()</code></td></tr>
-                                <tr><td><code>headless-dropdown</code></td><td><code>open</code></td><td><code>toggle()</code>, <code>show()</code>, <code>close()</code></td></tr>
-                                <tr><td><code>headless-toggle</code></td><td><code>pressed</code></td><td><code>toggle()</code></td></tr>
-                                <tr><td><code>headless-popover</code></td><td><code>open</code></td><td><code>toggle()</code>, <code>show()</code>, <code>close()</code></td></tr>
-                                <tr><td><code>headless-menu</code></td><td><code>open</code>, <code>activeIndex</code></td><td><code>toggle()</code>, <code>show()</code>, <code>close()</code>, <code>next(length)</code>, <code>prev(length)</code></td></tr>
-                                <tr><td><code>headless-combobox</code></td><td><code>open</code>, <code>query</code>, <code>selected</code>, <code>activeIndex</code></td><td><code>show()</code>, <code>close()</code>, <code>select(item)</code></td></tr>
-                                <tr><td><code>headless-listbox</code></td><td><code>open</code>, <code>value</code></td><td><code>toggle()</code>, <code>select(value)</code></td></tr>
-                            </tbody>
-                        </table>
-                    </div>
-
-                    <h3>Headless Tabs</h3>
-                    <pre><code>&lt;div ys-component="headless-tabs" ys-props="{ defaultValue: 'settings' }"&gt;
-    &lt;div role="tablist"&gt;
-        &lt;button
-            role="tab"
-            @click="select('overview')"
-            :aria-selected="isSelected('overview')"
-            ys-class="{ active: isSelected('overview') }"&gt;
-            Overview
-        &lt;/button&gt;
-
-        &lt;button
-            role="tab"
-            @click="select('settings')"
-            :aria-selected="isSelected('settings')"
-            ys-class="{ active: isSelected('settings') }"&gt;
-            Settings
-        &lt;/button&gt;
-    &lt;/div&gt;
-
-    &lt;section role="tabpanel" ys-show="isSelected('overview')" ys-cloak&gt;
-        Overview content
-    &lt;/section&gt;
-
-    &lt;section role="tabpanel" ys-show="isSelected('settings')" ys-cloak&gt;
-        Settings content
-    &lt;/section&gt;
-&lt;/div&gt;</code></pre>
-
-                    <h3>Headless Dialog</h3>
-                    <pre><code>&lt;div ys-component="headless-dialog" ys-key:escape.window="close()"&gt;
-    &lt;button @click="show()"&gt;Open dialog&lt;/button&gt;
-
-    &lt;div ys-show="open" ys-transition ys-cloak @click.self="close()"&gt;
-        &lt;section role="dialog" aria-modal="true" aria-labelledby="dialog-title"&gt;
-            &lt;h2 id="dialog-title"&gt;Delete user&lt;/h2&gt;
-            &lt;p&gt;This action cannot be undone.&lt;/p&gt;
-
-            &lt;button @click="close()"&gt;Cancel&lt;/button&gt;
-            &lt;button ys-post="/users/delete" @click="close()"&gt;Delete&lt;/button&gt;
-        &lt;/section&gt;
-    &lt;/div&gt;
-&lt;/div&gt;</code></pre>
-
-                    <h3>Disclosure And Dropdown</h3>
-                    <pre><code>&lt;div ys-component="headless-disclosure" ys-props="{ defaultOpen: true }"&gt;
-    &lt;button @click="toggle()" :aria-expanded="open"&gt;
-        Toggle section
-    &lt;/button&gt;
-
-    &lt;div ys-show="open" ys-cloak&gt;
-        Disclosure content
-    &lt;/div&gt;
-&lt;/div&gt;
-
-&lt;div ys-component="headless-dropdown"&gt;
-    &lt;button @click="toggle()" :aria-expanded="open"&gt;
-        Account menu
-    &lt;/button&gt;
-
-    &lt;div role="menu" ys-show="open" ys-cloak&gt;
-        &lt;button role="menuitem" @click="close()"&gt;Profile&lt;/button&gt;
-        &lt;button role="menuitem" @click="close()"&gt;Settings&lt;/button&gt;
-        &lt;button role="menuitem" @click="close()"&gt;Logout&lt;/button&gt;
-    &lt;/div&gt;
-&lt;/div&gt;</code></pre>
-
-                    <h3>Toggle And Popover</h3>
-                    <pre><code>&lt;button
-    ys-component="headless-toggle"
-    @click="toggle()"
-    :aria-pressed="pressed"
-    ys-class="{ active: pressed }"&gt;
-    &lt;span ys-text="pressed ? 'Enabled' : 'Disabled'"&gt;&lt;/span&gt;
-&lt;/button&gt;
-
-&lt;div ys-component="headless-popover"&gt;
-    &lt;button @click="toggle()" :aria-expanded="open"&gt;
-        Open popover
-    &lt;/button&gt;
-
-    &lt;div ys-show="open" ys-transition ys-cloak&gt;
-        Popover content
-    &lt;/div&gt;
-&lt;/div&gt;</code></pre>
-
-                    <h3>Headless Menu With Keyboard Movement</h3>
-                    <pre><code>&lt;div
-    ys-component="headless-menu"
-    ys-data="{ items: ['Profile', 'Settings', 'Logout'], selected: '' }"
-    ys-key:arrowdown="next(items.length)"
-    ys-key:arrowup="prev(items.length)"
-    ys-key:escape="close()"&gt;
-
-    &lt;button @click="toggle()"&gt;Open menu&lt;/button&gt;
-
-    &lt;div role="menu" ys-show="open" ys-cloak&gt;
-        &lt;button
-            role="menuitem"
-            ys-for="item, index in items"
-            ys-class="{ active: activeIndex === index }"
-            @mouseenter="activeIndex = index"
-            @click="selected = item; close()"&gt;
-            &lt;span ys-text="item"&gt;&lt;/span&gt;
-        &lt;/button&gt;
-    &lt;/div&gt;
-
-    &lt;p&gt;Selected: &lt;span ys-text="selected || 'None'"&gt;&lt;/span&gt;&lt;/p&gt;
-&lt;/div&gt;</code></pre>
-
-                    <h3>Headless Listbox</h3>
-                    <pre><code>&lt;div
-    ys-component="headless-listbox"
-    ys-props="{ defaultValue: 'pro' }"
-    ys-data="{ plans: ['free', 'pro', 'enterprise'] }"&gt;
-
-    &lt;button @click="toggle()" :aria-expanded="open"&gt;
-        &lt;span ys-text="value || 'Choose plan'"&gt;&lt;/span&gt;
-    &lt;/button&gt;
-
-    &lt;div role="listbox" ys-show="open" ys-cloak&gt;
-        &lt;button
-            role="option"
-            ys-for="plan in plans"
-            :aria-selected="value === plan"
-            ys-class="{ active: value === plan }"
-            @click="select(plan)"&gt;
-            &lt;span ys-text="plan"&gt;&lt;/span&gt;
-        &lt;/button&gt;
-    &lt;/div&gt;
-&lt;/div&gt;</code></pre>
-
-                    <h3>Headless Combobox</h3>
-                    <pre><code>&lt;div
-    ys-component="headless-combobox"
-    ys-data="{ people: ['Ali', 'Aisha', 'Musa', 'Hamid'] }"
-    ys-key:escape="close()"&gt;
-
-    &lt;input
-        ys-model="query"
-        @focus="show()"
-        placeholder="Search people"&gt;
-
-    &lt;div role="listbox" ys-show="open" ys-cloak&gt;
-        &lt;button
-            role="option"
-            ys-for="person in people.filter(name =&gt; name.toLowerCase().includes(query.toLowerCase()))"
-            @click="select(person); query = person"&gt;
-            &lt;span ys-text="person"&gt;&lt;/span&gt;
-        &lt;/button&gt;
-    &lt;/div&gt;
-
-    &lt;p&gt;Selected: &lt;span ys-text="selected || 'None'"&gt;&lt;/span&gt;&lt;/p&gt;
-&lt;/div&gt;</code></pre>
                 </section>
 
                 <section class="section" id="reactivity" data-search-item>
