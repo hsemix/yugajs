@@ -21,11 +21,6 @@ import { watch } from './reactive/watch.js'
 import { computed } from './reactive/computed.js'
 import { morph } from './dom/morph.js';
 
-/*
-|--------------------------------------------------------------------------
-| Runtime (IMPORTANT PART YOU WERE MISSING)
-|--------------------------------------------------------------------------
-*/
 import { compile } from './compiler/compiler.js'
 // import { startObserver } from './compiler/observer.js'
 import { observe } from './compiler/observer.js'
