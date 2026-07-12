@@ -289,6 +289,7 @@ npm run build
                                 <tr><td><code>ys-stream-action</code></td><td>Posts actions from inside a stream context.</td><td><code>ys-action-url</code></td></tr>
                                 <tr><td><code>ys-sse-signals</code></td><td>Streams state updates into target scopes.</td><td>Payload with <code>target</code> and <code>signals</code></td></tr>
                                 <tr><td><code>ys-visit</code></td><td>Fetches page fragments and pushes history state.</td><td><code>ys-target</code>, <code>ys-swap</code></td></tr>
+                                <tr><td><code>ys-prefetch</code></td><td>Warms the visit cache on first hover or focus.</td><td><code>ys-visit</code>, <code>ys-cache</code>, <code>ys-target</code></td></tr>
                                 <tr><td><code>ys-redirect</code></td><td>Navigates on click or submit.</td><td>URL expression</td></tr>
                                 <tr><td><code>ys-preview</code></td><td>Previews selected files.</td><td>File inputs</td></tr>
                                 <tr><td><code>ys-dropzone</code></td><td>Connects drag/drop to a file input.</td><td><code>ys-dragover</code> styling</td></tr>
@@ -366,7 +367,7 @@ npm run build
                                 <tr><td><code>ys-trigger</code></td><td>One or more request triggers, optionally with event, timing, target, intersection, and keyboard modifiers.</td></tr>
                                 <tr><td><code>ys-send</code></td><td>Evaluated JSON payload for a non-form mutation.</td></tr>
                                 <tr><td><code>ys-no-body</code></td><td>Sends a mutation request without a body.</td></tr>
-                                <tr><td><code>ys-headers</code></td><td>Evaluated per-request headers for GET; matching values override global headers.</td></tr>
+                                <tr><td><code>ys-headers</code></td><td>Evaluated per-request headers for GET, mutation, and visit directives; matching values override defaults.</td></tr>
                                 <tr><td><code>ys-cache</code></td><td>GET cache TTL in seconds.</td></tr>
                                 <tr><td><code>ys-loading-class</code></td><td>Class names added while a mutation request is running.</td></tr>
                                 <tr><td><code>ys-loading-text</code></td><td>Temporary text shown while a mutation request is running.</td></tr>
@@ -471,6 +472,44 @@ YS.start()
                     <pre><code>&lt;a href="/settings" ys-visit ys-target="#app" ys-swap="morph"&gt;
     Settings
 &lt;/a&gt;</code></pre>
+                    <p>Visits update browser history and document titles, restore fragments and scroll positions during back/forward navigation, and ignore modified clicks, downloads, and links targeting another browsing context.</p>
+
+                    <h3>Cached Visits and Prefetching</h3>
+                    <p>Use <code>ys-cache</code> to cache a visit, <code>ys-preserve-scroll</code> to retain the current scroll position, and <code>ys-prefetch</code> to fetch on first hover or focus. Prefetching defaults to a 30-second cache.</p>
+                    <pre><code>&lt;a
+    href="/reports"
+    ys-visit
+    ys-prefetch
+    ys-target="#app"
+    ys-swap="morph"
+    ys-cache="60"
+    ys-preserve-scroll&gt;
+    Reports
+&lt;/a&gt;</code></pre>
+
+                    <h3>Relative and Multiple Targets</h3>
+                    <p>Alongside CSS selectors, <code>ys-target</code> accepts <code>this</code>, <code>parent</code>, <code>next</code>, <code>previous</code>, <code>closest selector</code>, <code>find selector</code>, <code>find-all selector</code>, <code>children</code>, <code>children selector</code>, <code>body</code>, <code>head</code>, <code>document</code>, and <code>html</code>. Add a selector after <code>next</code> or <code>previous</code> to scan siblings for a match.</p>
+                    <pre><code>&lt;article class="user-card"&gt;
+    &lt;button
+        ys-delete="/users/15"
+        ys-target="closest .user-card"
+        ys-swap="outer"&gt;
+        Delete
+    &lt;/button&gt;
+&lt;/article&gt;
+
+&lt;button ys-get="/status" ys-target=".status-panel"&gt;
+    Refresh all matching panels
+&lt;/button&gt;</code></pre>
+
+                    <h3>Low-level Requests</h3>
+                    <p><code>YS.request()</code> supports <code>headers</code>, GET/HEAD <code>cache</code> TTLs, custom <code>cacheKey</code> values, upload <code>onProgress</code>, <code>timeout</code>, and <code>withCredentials</code>. Responses expose <code>ok</code>, <code>status</code>, <code>statusText</code>, <code>type</code>, <code>data</code>, <code>headers</code>, and <code>cached</code>.</p>
+                    <pre><code>const response = await YS.request('/api/report', {
+    method: 'GET',
+    cache: 30,
+    timeout: 5000,
+    withCredentials: true
+})</code></pre>
 
                     <h3>Request Events</h3>
                     <pre><code>YS.on('request:start', ({ url, method }) =&gt; {
@@ -482,7 +521,7 @@ YS.on('request:finish', ({ url }) =&gt; {
         document.querySelector('#toast').textContent = 'User deleted'
     }
 })</code></pre>
-                    <p>Available events include <code>request:start</code>, <code>request:success</code>, <code>request:error</code>, <code>request:finish</code>, and <code>request:validation-error</code>.</p>
+                    <p>Available events include <code>request:start</code>, <code>request:success</code>, <code>request:error</code>, <code>request:finish</code>, <code>request:progress</code>, <code>request:validation-error</code>, <code>visit:start</code>, <code>visit:finish</code>, <code>visit:error</code>, and <code>visit:prefetch</code>.</p>
                 </section>
 
                 <section class="section" id="streaming" data-search-item>

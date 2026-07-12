@@ -99,6 +99,21 @@ Useful helpers include:
 - `YS.uuid()`
 - `YS.parseHTML(html)`
 
+### `YS.request()` options
+
+The low-level request helper accepts `method`, `headers`, `body`, `onProgress`, `timeout`, and `withCredentials`. Successful GET and HEAD responses can be cached by passing a TTL in seconds as `cache`; use `cacheKey` to control the entry name.
+
+```js
+const response = await YS.request('/api/users', {
+    method: 'GET',
+    cache: 30,
+    timeout: 5000,
+    withCredentials: true
+})
+
+console.log(response.status, response.data, response.cached)
+```
+
 ## Reactivity
 
 ```js

@@ -94,7 +94,7 @@ Forms are sent as `FormData`. Non-form elements send the current component state
 
 ## Headers and CSRF
 
-Configure headers globally before calling `YS.start()`. `headers` may be an object or a function that returns an object. Per-request `ys-headers` expressions are supported by `ys-get` and override matching global values.
+Configure headers globally before calling `YS.start()`. `headers` may be an object or a function that returns an object. Per-request `ys-headers` expressions are supported by GET, mutation, and visit directives and override matching global or payload headers.
 
 ```html
 <meta name="csrf-token" content="your-token">
@@ -136,7 +136,7 @@ Use `ys-swap` to choose how the response is applied.
 | `ys-trigger` | One or more request triggers and modifiers |
 | `ys-send` | Evaluated JSON payload for non-form mutations |
 | `ys-no-body` | Sends a mutation request without a body |
-| `ys-headers` | Evaluated per-request headers for GET |
+| `ys-headers` | Evaluated per-request headers for GET, mutation, and visit requests |
 | `ys-cache` | GET cache time-to-live in seconds |
 | `ys-loading-class` | Classes added during a mutation request |
 | `ys-loading-text` | Temporary button or element text during a mutation request |
@@ -253,6 +253,82 @@ Use `ys-visit` for app-style navigation that fetches a page fragment, swaps it i
 <main id="app"></main>
 ```
 
+Visits update the document title when a full HTML response includes one, restore the correct fragment and scroll position when navigating back or forward, and ignore modified clicks, downloads, and links targeting another browsing context.
+
+Use `ys-cache` to cache a visit response and `ys-preserve-scroll` to retain the current scroll position after navigation. Visit requests include `X-YS-Visit: true` and accept both HTML and JSON responses.
+
+```html
+<a
+    href="/reports"
+    ys-visit
+    ys-target="#app"
+    ys-swap="morph"
+    ys-cache="30"
+    ys-preserve-scroll>
+    Reports
+</a>
+```
+
+## Visit Prefetching
+
+Add `ys-prefetch` to fetch and cache a visit when its link is first hovered or focused. The default cache lifetime is 30 seconds; override it with `ys-cache`. The target must match the associated visit so both use the same cache entry.
+
+```html
+<a
+    href="/settings"
+    ys-visit
+    ys-prefetch
+    ys-target="#app"
+    ys-cache="60">
+    Settings
+</a>
+```
+
+Prefetch requests include `X-YS-Prefetch: true` and emit `visit:prefetch` after completing.
+
+## Relative and Multiple Targets
+
+`ys-target` accepts normal CSS selectors and relative expressions. GET and mutation requests update every element matched by a CSS selector or multi-target expression; visits use the first match.
+
+| Expression | Resolves to |
+| --- | --- |
+| `this` | The requesting element |
+| `parent` | Its parent |
+| `next` / `previous` | The adjacent element sibling |
+| `next .item` / `previous .item` | The next/previous sibling matching the selector |
+| `closest .card` | The nearest matching ancestor, including the element itself |
+| `find .result` | The first matching descendant |
+| `find-all .result` | All matching descendants |
+| `children` / `children .item` | All children, optionally filtered |
+| `body`, `head`, `document`, `html` | The corresponding document element |
+
+```html
+<article class="user-card">
+    <button ys-delete="/users/15" ys-target="closest .user-card" ys-swap="outer">
+        Delete
+    </button>
+</article>
+
+<button ys-get="/status" ys-target=".status-panel">Refresh all panels</button>
+```
+
+## Low-level Requests
+
+`YS.request()` supports global and request-specific headers, GET/HEAD response caching, upload progress, timeouts, credentials, and custom cache keys.
+
+```js
+const response = await YS.request('/api/report', {
+    method: 'GET',
+    headers: { Accept: 'application/json' },
+    cache: 30,
+    cacheKey: 'current-report',
+    timeout: 5000,
+    withCredentials: true
+})
+
+console.log(response.ok, response.status, response.data, response.cached)
+```
+
 ## Events
 
 YugaJS emits request events that can be listened to with `YS.on`.
@@ -274,6 +350,11 @@ Common events:
 - `request:error`
 - `request:finish`
 - `request:validation-error`
+- `request:progress`
+- `visit:start`
+- `visit:finish`
+- `visit:error`
+- `visit:prefetch`
 
 The examples use request events for small UI side effects such as toasts after inline edits.
 
